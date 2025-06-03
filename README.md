@@ -134,6 +134,15 @@ book-lending-system/
 ### 借阅记录
 ![借阅记录](https://example.com/screenshots/borrow-list.png)
 
+## 最近更新
+
+### 2025-06-03 更新
+- 修复了导航链接中的上下文路径问题
+- 更新了用户注册和登录页面中的表单提交路径
+- 修复了页面跳转和重定向问题
+- 更新了测试类，使用JUnit 5替代JUnit 3
+- 优化了数据库配置
+
 ## 开发者
 
 - PolymerXX
