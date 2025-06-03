@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>用户管理</h2>
+            <a href="/user/add" class="btn btn-primary">添加用户</a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>手机号</th>
+                        <th>角色</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}">ID</td>
+                        <td th:text="${user.username}">用户名</td>
+                        <td th:text="${user.email}">邮箱</td>
+                        <td th:text="${user.phone}">手机号</td>
+                        <td>
+                            <span th:if="${user.role == 0}" class="badge badge-info">普通用户</span>
+                            <span th:if="${user.role == 1}" class="badge badge-warning">管理员</span>
+                        </td>
+                        <td th:text="${#dates.format(user.createTime, 'yyyy-MM-dd HH:mm:ss')}">注册时间</td>
+                        <td>
+                            <a th:href="@{/user/edit/{id}(id=${user.id})}" class="btn btn-sm btn-secondary">编辑</a>
+                            <button class="btn btn-sm btn-danger" th:onclick="'deleteUser(' + ${user.id} + ')'">删除</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(users)}" class="alert alert-info">
+            暂无用户
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/header :: footer"></footer>
+    
+    <script>
+        function deleteUser(id) {
+            if (!confirm('确定要删除这个用户吗？此操作不可恢复！')) {
+                return;
+            }
+            
+            $.ajax({
+                url: '/user/delete/' + id,
+                type: 'POST',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('删除成功');
+                        window.location.reload();
+                    } else {
+                        alert(response.message || '删除失败');
+                    }
+                },
+                error: function() {
+                    alert('删除失败，请稍后再试');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
