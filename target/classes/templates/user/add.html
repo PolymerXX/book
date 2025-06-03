@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>添加用户</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger" id="error-message" style="display: none;"></div>
+                        <form id="addUserForm">
+                            <div class="form-group">
+                                <label for="username">用户名</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">密码</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">邮箱</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">手机号</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{11}" required>
+                                <small class="form-text text-muted">请输入11位手机号码</small>
+                            </div>
+                            <div class="form-group">
+                                <label>角色</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="role" id="roleUser" value="0" checked>
+                                    <label class="form-check-label" for="roleUser">
+                                        普通用户
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="role" id="roleAdmin" value="1">
+                                    <label class="form-check-label" for="roleAdmin">
+                                        管理员
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">添加用户</button>
+                            <a href="/user/list" class="btn btn-secondary">取消</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/header :: footer"></footer>
+    
+    <script>
+        $(document).ready(function() {
+            $('#addUserForm').submit(function(e) {
+                e.preventDefault();
+                
+                // 表单验证
+                var email = $('#email').val();
+                var phone = $('#phone').val();
+                
+                // 邮箱验证
+                var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+                if (!emailRegex.test(email)) {
+                    $('#error-message').text('请输入有效的邮箱地址').show();
+                    return;
+                }
+                
+                // 手机号验证
+                var phoneRegex = /^[0-9]{11}$/;
+                if (!phoneRegex.test(phone)) {
+                    $('#error-message').text('请输入11位手机号码').show();
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/user/add',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        username: $('#username').val(),
+                        password: $('#password').val(),
+                        email: email,
+                        phone: phone,
+                        role: $('input[name="role"]:checked').val()
+                    }),
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('添加成功');
+                            window.location.href = '/user/list';
+                        } else {
+                            $('#error-message').text(response.message).show();
+                        }
+                    },
+                    error: function() {
+                        $('#error-message').text('添加失败，请稍后再试').show();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

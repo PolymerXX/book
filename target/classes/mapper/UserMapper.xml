@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.booklending.mapper.UserMapper">
+    
+    <resultMap id="BaseResultMap" type="com.booklending.model.User">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="role" property="role" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, username, password, email, phone, role, create_time, update_time
+    </sql>
+    
+    <insert id="insert" parameterType="com.booklending.model.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO "user" (username, password, email, phone, role, create_time, update_time)
+        VALUES (#{username}, #{password}, #{email}, #{phone}, #{role}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    </insert>
+    
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM "user" WHERE id = #{id}
+    </delete>
+    
+    <update id="update" parameterType="com.booklending.model.User">
+        UPDATE "user"
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="role != null">role = #{role},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM "user"
+        WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUsername" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM "user"
+        WHERE username = #{username}
+    </select>
+    
+    <select id="selectByUsernameAndPassword" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM "user"
+        WHERE username = #{username} AND password = #{password}
+    </select>
+    
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM "user"
+    </select>
+    
+    <select id="selectByCondition" resultMap="BaseResultMap" parameterType="com.booklending.model.User">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM "user"
+        <where>
+            <if test="username != null and username != ''">
+                AND username LIKE '%' || #{username} || '%'
+            </if>
+            <if test="email != null and email != ''">
+                AND email LIKE '%' || #{email} || '%'
+            </if>
+            <if test="phone != null and phone != ''">
+                AND phone LIKE '%' || #{phone} || '%'
+            </if>
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+        </where>
+    </select>
+</mapper>

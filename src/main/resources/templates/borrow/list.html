@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container">
+        <h2 class="mb-4">借阅记录</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>书名</th>
+                        <th th:if="${session.user.role == 1}">用户</th>
+                        <th>借阅日期</th>
+                        <th>应还日期</th>
+                        <th>实际归还日期</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="borrow : ${borrows}">
+                        <td th:text="${borrow.id}">ID</td>
+                        <td>
+                            <a th:href="@{/book/detail/{id}(id=${borrow.bookId})}" th:text="${borrow.book != null ? borrow.book.title : '未知书籍'}">书名</a>
+                        </td>
+                        <td th:if="${session.user.role == 1}" th:text="${borrow.user != null ? borrow.user.username : '未知用户'}">用户</td>
+                        <td th:text="${#dates.format(borrow.borrowDate, 'yyyy-MM-dd')}">借阅日期</td>
+                        <td th:text="${#dates.format(borrow.returnDate, 'yyyy-MM-dd')}">应还日期</td>
+                        <td th:text="${borrow.actualReturnDate != null ? #dates.format(borrow.actualReturnDate, 'yyyy-MM-dd') : '-'}">实际归还日期</td>
+                        <td>
+                            <span th:if="${borrow.status == 0}" class="badge badge-warning">借阅中</span>
+                            <span th:if="${borrow.status == 1}" class="badge badge-success">已归还</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/borrow/detail/{id}(id=${borrow.id})}" class="btn btn-sm btn-info">详情</a>
+                            <button th:if="${borrow.status == 0}" class="btn btn-sm btn-success" th:onclick="'returnBook(' + ${borrow.id} + ')'">归还</button>
+                            <button th:if="${session.user.role == 1}" class="btn btn-sm btn-danger" th:onclick="'deleteBorrow(' + ${borrow.id} + ')'">删除</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(borrows)}" class="alert alert-info">
+            暂无借阅记录
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/header :: footer"></footer>
+    
+    <script>
+        function returnBook(id) {
+            if (!confirm('确定要归还这本书吗？')) {
+                return;
+            }
+            
+            $.ajax({
+                url: '/book-lending/borrow/return/' + id,
+                type: 'POST',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('归还成功');
+                        window.location.reload();
+                    } else {
+                        alert(response.message || '归还失败');
+                    }
+                },
+                error: function() {
+                    alert('归还失败，请稍后再试');
+                }
+            });
+        }
+        
+        function deleteBorrow(id) {
+            if (!confirm('确定要删除这条借阅记录吗？此操作不可恢复！')) {
+                return;
+            }
+            
+            $.ajax({
+                url: '/book-lending/borrow/delete/' + id,
+                type: 'POST',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('删除成功');
+                        window.location.reload();
+                    } else {
+                        alert(response.message || '删除失败');
+                    }
+                },
+                error: function() {
+                    alert('删除失败，请稍后再试');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

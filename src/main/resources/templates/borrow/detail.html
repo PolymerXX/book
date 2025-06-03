@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>借阅详情</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img th:src="${borrow.book != null && borrow.book.coverImage != null ? borrow.book.coverImage : '/images/default-cover.jpg'}" class="img-fluid" alt="Book Cover">
+                            </div>
+                            <div class="col-md-8">
+                                <h5 th:text="${borrow.book != null ? borrow.book.title : '未知书籍'}">书名</h5>
+                                <p><strong>作者：</strong> <span th:text="${borrow.book != null ? borrow.book.author : '未知'}">作者</span></p>
+                                <p><strong>ISBN：</strong> <span th:text="${borrow.book != null ? borrow.book.isbn : '未知'}">ISBN</span></p>
+                                
+                                <hr>
+                                
+                                <p><strong>借阅ID：</strong> <span th:text="${borrow.id}">ID</span></p>
+                                <p th:if="${session.user.role == 1}"><strong>借阅用户：</strong> <span th:text="${borrow.user != null ? borrow.user.username : '未知用户'}">用户</span></p>
+                                <p><strong>借阅日期：</strong> <span th:text="${#dates.format(borrow.borrowDate, 'yyyy-MM-dd HH:mm:ss')}">借阅日期</span></p>
+                                <p><strong>应还日期：</strong> <span th:text="${#dates.format(borrow.returnDate, 'yyyy-MM-dd HH:mm:ss')}">应还日期</span></p>
+                                <p><strong>实际归还日期：</strong> <span th:text="${borrow.actualReturnDate != null ? #dates.format(borrow.actualReturnDate, 'yyyy-MM-dd HH:mm:ss') : '未归还'}">实际归还日期</span></p>
+                                <p><strong>状态：</strong> 
+                                    <span th:if="${borrow.status == 0}" class="badge badge-warning">借阅中</span>
+                                    <span th:if="${borrow.status == 1}" class="badge badge-success">已归还</span>
+                                </p>
+                                
+                                <div class="mt-4">
+                                    <button th:if="${borrow.status == 0}" class="btn btn-success" onclick="returnBook()">归还</button>
+                                    <a href="/book-lending/borrow/list" class="btn btn-secondary">返回列表</a>
+                                    <button th:if="${session.user.role == 1}" class="btn btn-danger" onclick="deleteBorrow()">删除记录</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/header :: footer"></footer>
+    
+    <script th:inline="javascript">
+        function returnBook() {
+            if (!confirm('确定要归还这本书吗？')) {
+                return;
+            }
+            
+            var borrowId = [[${borrow.id}]];
+            
+            $.ajax({
+                url: '/book-lending/borrow/return/' + borrowId,
+                type: 'POST',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('归还成功');
+                        window.location.reload();
+                    } else {
+                        alert(response.message || '归还失败');
+                    }
+                },
+                error: function() {
+                    alert('归还失败，请稍后再试');
+                }
+            });
+        }
+        
+        function deleteBorrow() {
+            if (!confirm('确定要删除这条借阅记录吗？此操作不可恢复！')) {
+                return;
+            }
+            
+            var borrowId = [[${borrow.id}]];
+            
+            $.ajax({
+                url: '/book-lending/borrow/delete/' + borrowId,
+                type: 'POST',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('删除成功');
+                        window.location.href = '/book-lending/borrow/list';
+                    } else {
+                        alert(response.message || '删除失败');
+                    }
+                },
+                error: function() {
+                    alert('删除失败，请稍后再试');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

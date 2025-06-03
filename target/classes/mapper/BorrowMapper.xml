@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.booklending.mapper.BorrowMapper">
+    
+    <resultMap id="BaseResultMap" type="com.booklending.model.Borrow">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="book_id" property="bookId" jdbcType="INTEGER"/>
+        <result column="borrow_date" property="borrowDate" jdbcType="TIMESTAMP"/>
+        <result column="return_date" property="returnDate" jdbcType="TIMESTAMP"/>
+        <result column="actual_return_date" property="actualReturnDate" jdbcType="TIMESTAMP"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <resultMap id="BorrowWithUserAndBookMap" type="com.booklending.model.Borrow" extends="BaseResultMap">
+        <association property="user" javaType="com.booklending.model.User">
+            <id column="user_id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="email" property="email"/>
+            <result column="phone" property="phone"/>
+        </association>
+        <association property="book" javaType="com.booklending.model.Book">
+            <id column="book_id" property="id"/>
+            <result column="title" property="title"/>
+            <result column="author" property="author"/>
+            <result column="isbn" property="isbn"/>
+            <result column="cover_image" property="coverImage"/>
+        </association>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, user_id, book_id, borrow_date, return_date, actual_return_date, status, create_time, update_time
+    </sql>
+    
+    <sql id="Join_Column_List">
+        b.id, b.user_id, b.book_id, b.borrow_date, b.return_date, b.actual_return_date, b.status, b.create_time, b.update_time,
+        u.username, u.email, u.phone,
+        bk.title, bk.author, bk.isbn, bk.cover_image
+    </sql>
+    
+    <insert id="insert" parameterType="com.booklending.model.Borrow" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO borrow (user_id, book_id, borrow_date, return_date, status, create_time, update_time)
+        VALUES (#{userId}, #{bookId}, #{borrowDate}, #{returnDate}, #{status}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    </insert>
+    
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM borrow WHERE id = #{id}
+    </delete>
+    
+    <update id="update" parameterType="com.booklending.model.Borrow">
+        UPDATE borrow
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="bookId != null">book_id = #{bookId},</if>
+            <if test="borrowDate != null">borrow_date = #{borrowDate},</if>
+            <if test="returnDate != null">return_date = #{returnDate},</if>
+            <if test="actualReturnDate != null">actual_return_date = #{actualReturnDate},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updateStatus">
+        UPDATE borrow
+        SET status = #{status}, update_time = CURRENT_TIMESTAMP
+        <if test="status == 1">
+            , actual_return_date = CURRENT_TIMESTAMP
+        </if>
+        WHERE id = #{id}
+    </update>
+    
+    <select id="selectById" resultMap="BorrowWithUserAndBookMap" parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM borrow b
+        LEFT JOIN "user" u ON b.user_id = u.id
+        LEFT JOIN book bk ON b.book_id = bk.id
+        WHERE b.id = #{id}
+    </select>
+    
+    <select id="selectAll" resultMap="BorrowWithUserAndBookMap">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM borrow b
+        LEFT JOIN "user" u ON b.user_id = u.id
+        LEFT JOIN book bk ON b.book_id = bk.id
+    </select>
+    
+    <select id="selectByUserId" resultMap="BorrowWithUserAndBookMap" parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM borrow b
+        LEFT JOIN "user" u ON b.user_id = u.id
+        LEFT JOIN book bk ON b.book_id = bk.id
+        WHERE b.user_id = #{userId}
+    </select>
+    
+    <select id="selectByBookId" resultMap="BorrowWithUserAndBookMap" parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM borrow b
+        LEFT JOIN "user" u ON b.user_id = u.id
+        LEFT JOIN book bk ON b.book_id = bk.id
+        WHERE b.book_id = #{bookId}
+    </select>
+    
+    <select id="selectByUserIdAndBookId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM borrow
+        WHERE user_id = #{userId} AND book_id = #{bookId} AND status = 0
+    </select>
+</mapper>

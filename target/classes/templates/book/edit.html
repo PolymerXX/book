@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>编辑书籍</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger" id="error-message" style="display: none;"></div>
+                        <form id="editBookForm">
+                            <input type="hidden" id="id" th:value="${book.id}">
+                            <div class="form-group">
+                                <label for="title">书名</label>
+                                <input type="text" class="form-control" id="title" name="title" th:value="${book.title}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="author">作者</label>
+                                <input type="text" class="form-control" id="author" name="author" th:value="${book.author}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="publisher">出版社</label>
+                                <input type="text" class="form-control" id="publisher" name="publisher" th:value="${book.publisher}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="publishYear">出版年份</label>
+                                <input type="number" class="form-control" id="publishYear" name="publishYear" th:value="${book.publishYear}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="isbn">ISBN</label>
+                                <input type="text" class="form-control" id="isbn" name="isbn" th:value="${book.isbn}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="stock">库存</label>
+                                <input type="number" class="form-control" id="stock" name="stock" min="0" th:value="${book.stock}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">简介</label>
+                                <textarea class="form-control" id="description" name="description" rows="5" required th:text="${book.description}"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="coverImage">封面图片URL</label>
+                                <input type="text" class="form-control" id="coverImage" name="coverImage" th:value="${book.coverImage}">
+                                <small class="form-text text-muted">请输入图片URL或上传图片</small>
+                            </div>
+                            <div class="form-group">
+                                <label>上传封面图片</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="coverFile" accept="image/*">
+                                    <label class="custom-file-label" for="coverFile">选择文件</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="status" name="status" value="0" th:checked="${book.status == 0}">
+                                    <label class="form-check-label" for="status">
+                                        可借阅
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">保存修改</button>
+                            <a th:href="@{/book/detail/{id}(id=${book.id})}" class="btn btn-secondary">取消</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/header :: footer"></footer>
+    
+    <script>
+        $(document).ready(function() {
+            // 显示选择的文件名
+            $('#coverFile').change(function() {
+                var fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').html(fileName);
+                
+                // 上传图片
+                if (this.files && this.files[0]) {
+                    var formData = new FormData();
+                    formData.append('file', this.files[0]);
+                    
+                    $.ajax({
+                        url: '/book/upload',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.code === 200) {
+                                $('#coverImage').val(response.data);
+                            } else {
+                                alert(response.message || '上传失败');
+                            }
+                        },
+                        error: function() {
+                            alert('上传失败，请稍后再试');
+                        }
+                    });
+                }
+            });
+            
+            // 提交表单
+            $('#editBookForm').submit(function(e) {
+                e.preventDefault();
+                
+                var statusValue = $('#status').is(':checked') ? 0 : 1;
+                
+                $.ajax({
+                    url: '/book/edit',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        id: $('#id').val(),
+                        title: $('#title').val(),
+                        author: $('#author').val(),
+                        publisher: $('#publisher').val(),
+                        publishYear: $('#publishYear').val(),
+                        isbn: $('#isbn').val(),
+                        stock: $('#stock').val(),
+                        description: $('#description').val(),
+                        coverImage: $('#coverImage').val(),
+                        status: statusValue
+                    }),
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('修改成功');
+                            window.location.href = '/book/detail/' + $('#id').val();
+                        } else {
+                            $('#error-message').text(response.message).show();
+                        }
+                    },
+                    error: function() {
+                        $('#error-message').text('修改失败，请稍后再试').show();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

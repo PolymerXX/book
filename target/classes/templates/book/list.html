@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>书籍列表</h2>
+            <div th:if="${session.user != null && session.user.role == 1}">
+                <a href="/book/add" class="btn btn-primary">添加书籍</a>
+            </div>
+        </div>
+        
+        <div th:if="${keyword != null}" class="alert alert-info">
+            搜索结果: <span th:text="${keyword}"></span>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3" th:each="book : ${books}">
+                <div class="card book-card">
+                    <img th:src="${book.coverImage != null ? book.coverImage : '/images/default-cover.jpg'}" class="card-img-top book-cover" alt="Book Cover">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${book.title}">书名</h5>
+                        <p class="card-text" th:text="${book.author}">作者</p>
+                        <p class="card-text">
+                            <small class="text-muted" th:text="${book.publisher}">出版社</small>
+                        </p>
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/book/detail/{id}(id=${book.id})}" class="btn btn-sm btn-primary">查看详情</a>
+                            <span th:if="${book.stock > 0}" class="badge badge-success">可借阅</span>
+                            <span th:if="${book.stock <= 0}" class="badge badge-danger">已借完</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(books)}" class="alert alert-warning mt-3">
+            没有找到相关书籍
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/header :: footer"></footer>
+</body>
+</html>
