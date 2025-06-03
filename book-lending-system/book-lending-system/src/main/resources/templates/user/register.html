@@ -34,7 +34,7 @@
                             <button type="submit" class="btn btn-primary btn-block">注册</button>
                         </form>
                         <div class="mt-3 text-center">
-                            <p>已有账号？<a href="/user/login">立即登录</a></p>
+                            <p>已有账号？<a href="/book-lending/user/login">立即登录</a></p>
                         </div>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                 }
                 
                 $.ajax({
-                    url: '/user/register',
+                    url: '/book-lending/user/register',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
@@ -81,7 +81,7 @@
                     success: function(response) {
                         if (response.code === 200) {
                             alert('注册成功，请登录');
-                            window.location.href = '/user/login';
+                            window.location.href = '/book-lending/user/login';
                         } else {
                             $('#error-message').text(response.message).show();
                         }

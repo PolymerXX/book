@@ -28,7 +28,7 @@
                             class="btn btn-primary" onclick="borrowBook()">借阅此书</button>
                     
                     <div th:if="${session.user == null}" class="alert alert-info">
-                        请<a href="/user/login">登录</a>后借阅此书
+                        请<a href="/book-lending/user/login">登录</a>后借阅此书
                     </div>
                     
                     <div th:if="${book.stock <= 0 || book.status != 0}" class="alert alert-warning">
@@ -36,7 +36,7 @@
                     </div>
                     
                     <div th:if="${session.user != null && session.user.role == 1}" class="mt-3">
-                        <a th:href="@{/book/edit/{id}(id=${book.id})}" class="btn btn-secondary">编辑</a>
+                        <a th:href="@{/book-lending/book/edit/{id}(id=${book.id})}" class="btn btn-secondary">编辑</a>
                         <button class="btn btn-danger" onclick="deleteBook()">删除</button>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
             var bookId = [[${book.id}]];
             
             $.ajax({
-                url: '/borrow/borrow/' + bookId,
+                url: '/book-lending/borrow/borrow/' + bookId,
                 type: 'POST',
                 success: function(response) {
                     if (response.code === 200) {
@@ -79,12 +79,12 @@
             var bookId = [[${book.id}]];
             
             $.ajax({
-                url: '/book/delete/' + bookId,
+                url: '/book-lending/book/delete/' + bookId,
                 type: 'POST',
                 success: function(response) {
                     if (response.code === 200) {
                         alert('删除成功');
-                        window.location.href = '/book/list';
+                        window.location.href = '/book-lending/book/list';
                     } else {
                         alert(response.message || '删除失败');
                     }

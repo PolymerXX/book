@@ -30,42 +30,42 @@
 <body>
     <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">书籍借阅管理系统</a>
+            <a class="navbar-brand" href="/book-lending/">书籍借阅管理系统</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">首页</a>
+                        <a class="nav-link" href="/book-lending/">首页</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/book/list">书籍列表</a>
+                        <a class="nav-link" href="/book-lending/book/list">书籍列表</a>
                     </li>
                     <li class="nav-item" th:if="${session.user != null}">
-                        <a class="nav-link" href="/borrow/list">我的借阅</a>
+                        <a class="nav-link" href="/book-lending/borrow/list">我的借阅</a>
                     </li>
                     <li class="nav-item" th:if="${session.user != null && session.user.role == 1}">
-                        <a class="nav-link" href="/user/list">用户管理</a>
+                        <a class="nav-link" href="/book-lending/user/list">用户管理</a>
                     </li>
                 </ul>
-                <form class="form-inline my-2 my-lg-0" action="/book/search" method="get">
+                <form class="form-inline my-2 my-lg-0" action="/book-lending/book/search" method="get">
                     <input class="form-control mr-sm-2" type="search" name="keyword" placeholder="搜索书籍">
                     <button class="btn btn-outline-light my-2 my-sm-0" type="submit">搜索</button>
                 </form>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item" th:if="${session.user == null}">
-                        <a class="nav-link" href="/user/login">登录</a>
+                        <a class="nav-link" href="/book-lending/user/login">登录</a>
                     </li>
                     <li class="nav-item" th:if="${session.user == null}">
-                        <a class="nav-link" href="/user/register">注册</a>
+                        <a class="nav-link" href="/book-lending/user/register">注册</a>
                     </li>
                     <li class="nav-item dropdown" th:if="${session.user != null}">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
                             <span th:text="${session.user.username}">用户名</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="/user/logout">退出登录</a>
+                            <a class="dropdown-item" href="/book-lending/user/logout">退出登录</a>
                         </div>
                     </li>
                 </ul>
